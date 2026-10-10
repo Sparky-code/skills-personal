@@ -12,6 +12,8 @@ collection managed by a lockfile. Nothing here comes from upstream.
 |---|---|
 | `frontend-ui-stack` | The default frontend stack for `/Users/sparky/Code` — Vite + React, Tailwind v4, shadcn/ui on Base UI, DTCG tokens via Style Dictionary, Material principles (not MUI). |
 | `local-llm-mlx` | The default local-LLM stack — MLX via mlx-lm, two Qwen3 tiers behind one client, LoRA adapters with the `v{n}` / `current.json` promotion contract. |
+| `interview-mode` | Plan-first, checkpointed, scope-fenced execution for timed or graded sessions (interviews, take-homes, live pairing). |
+| `dream` | Manual `/dream` — local reconstruction of the Managed Agents Dreams API: consolidates one project's auto-memory against its recent transcripts into a staged copy, with diff, report and a separate promote step. Run state in `~/.claude/dream/`. |
 
 ## Install
 
