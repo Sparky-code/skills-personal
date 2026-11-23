@@ -1,123 +1,129 @@
 ---
 name: frontend-ui-stack
-description: Use whenever starting a new frontend project, scaffolding a web app, adding or styling any UI component, choosing colors/spacing/fonts/type sizes, building a quick single-file HTML prototype or demo, or when the user says "our design system" or wants a "Material-style UI". Defines the one default frontend stack for /Users/sparky/Code.
+description: Use whenever starting a new frontend project, scaffolding a web app, adding or styling any UI component, choosing colors/spacing/fonts/type sizes, building a map UI, building a quick single-file HTML prototype or demo, or when the user says "our design system" or wants a "Material-style UI". Defines the one default frontend stack and the shared design tokens.
 ---
 
 # Frontend UI Stack
 
-This is the default, non-negotiable stack for new UI work anywhere under `/Users/sparky/Code`, unless a project explicitly overrides it.
+The default stack for new UI work, unless a project explicitly overrides it.
+It sits inside the wider project standards (see the `project-standards` skill
+for toolchain, web-app shape and data rules).
 
-The stack: **Vite + React** by default (**Next.js** only when SSR/SEO is needed from day one), **Tailwind CSS v4**, **shadcn/ui** on **Base UI** headless primitives, **DTCG design tokens** compiled with **Style Dictionary**, and Material Design *principles* — grid, type scale, elevation, color roles — never the literal MUI component library.
+The stack: **Vite + React** by default (**Next.js** only when SSR/SEO is needed
+from day one; **plain TypeScript + CSS** for UIs that are mostly a map or a
+single tool view), **Tailwind CSS v4**, **shadcn/ui on Radix** primitives, one
+shared **`tokens.css`** of design tokens, **MapLibre GL** for maps, and
+Material Design *principles* (grid, type scale, elevation, color roles), never
+the literal MUI component library.
 
-Every new frontend project starts from the same tokens and the same primitives so that colors, spacing, type, and component behavior stay consistent across every project in this workspace instead of each one improvising its own. This isn't a stylistic preference — it's the fix for a real, already-observed failure mode: independent projects in this workspace have separately reinvented badge-color systems and "danger red" hex values that don't agree with each other. One token set, reused everywhere, is what prevents that drift from recurring, and it's why the checklist below treats a hardcoded value as a defect rather than a shortcut.
+Every new frontend starts from the same tokens and the same primitives so that
+colors, spacing, type and component behavior stay consistent across projects
+instead of each one improvising its own. This fixes an observed failure:
+independent projects separately reinvented badge-color systems and "danger
+red" values that didn't agree. One token file, reused everywhere, prevents
+that drift, which is why the checklist treats a hard-coded value as a defect.
 
 ## Why each layer was picked
 
-- **Vite** — fast dev server and build with no framework lock-in; the right default until SSR/SEO forces Next.js.
-- **Tailwind CSS v4** — CSS-first `@theme` config maps directly onto compiled token variables, so utility classes and tokens are the same values, not two systems to keep in sync.
-- **shadcn/ui on Base UI** — component code is copied into the repo (owned, editable, no runtime dependency to version-track) while Base UI supplies Material-grade accessibility behavior without MUI's visual opinions.
-- **DTCG tokens + Style Dictionary** — one machine-readable source of truth compiles to both the React/Tailwind tier and the plain-HTML tier, so neither can silently drift from the other.
-- **Material *principles*, not MUI** — the grid, type scale, elevation, and color-role vocabulary are borrowed because they're a proven, well-documented system; the literal component library and its visual identity are not.
-- **WCAG 2.2 AA as the accessibility baseline** — including the newer Focus Not Obscured, Focus Appearance, and 24×24px target-size criteria, mostly satisfied for free by Base UI; see `references/accessibility.md` for what still needs manual verification.
+- **Vite**: fast dev server and build with no framework lock-in; the right default until SSR/SEO forces Next.js.
+- **Tailwind CSS v4**: CSS-first `@theme` config maps directly onto the token variables, so utility classes and tokens are the same values.
+- **shadcn/ui on Radix**: component code is copied into the repo (owned, editable, no runtime package for the visual layer); Radix supplies proven, accessible behavior (focus, keyboard, ARIA). Radix is shadcn's default and its most-used path.
+- **One hand-written `tokens.css`**: CSS custom properties, vendored into each project from the templates repo (`shared/tokens.css`) and updated with `copier update`. No token compiler to maintain. React Native gets a hex mirror (`tokens.ts`) with a drift check.
+- **MapLibre GL**: vector tiles, PMTiles, styling, terrain; works with self-hosted tiles. Leaflet is acceptable for simple raster overlays.
+- **Material *principles*, not MUI**: the grid, type scale, elevation and color-role vocabulary are a proven system; MUI's components and look are not used.
+- **WCAG 2.2 AA** as the accessibility baseline, mostly satisfied by Radix; see `references/accessibility.md` for what still needs manual checks.
 
-## Canonical paths
+## Canonical sources
 
-- `/Users/sparky/Code/templates/react-vite-material/` — the boilerplate template to copy from.
-- `/Users/sparky/Code/templates/react-vite-material/tokens/design-tokens.json` — the compiled source of truth for every token value.
-- `/Users/sparky/Code/templates/plain-html-fallback/` — the reference fixture for the zero-build tier.
-
-These are provisioned by a companion build task; if a path doesn't exist yet, treat the values documented in `references/design-tokens.md` as the spec to implement against, not as an optional detail to improvise.
+- Tokens: `shared/tokens.css` in the templates repo (`gh:Sparky-code/templates`); the values are listed in `references/design-tokens.md`.
+- React app scaffold: the templates repo's `react-web` shape (`bin/new-project react-web <dir>`), with Tailwind, shadcn on Radix and the tokens already wired.
+- Plain-HTML pattern: `references/plain-html-fallback.md`.
 
 ## Defaults beyond the core stack
 
-- **Typography**: Inter (or Geist) as the default UI sans font, loaded as a variable font (`@fontsource-variable/inter`). Don't introduce a second UI typeface without a stated reason.
-- **Icons**: Lucide — shadcn/ui's built-in icon set. Use it before reaching for a second icon library; mixing icon sets is a visible inconsistency the same way mixing token systems is an invisible one.
+- **Typography**: Inter as a variable font (`@fontsource-variable/inter`). Don't add a second UI typeface without a stated reason.
+- **Icons**: Lucide (shadcn's icon set). Don't mix icon libraries.
+- **Client data and state** (guidance): TanStack Query for server data, React Router for single-page routing, Zustand only when shared client state is needed, `fetch` not axios.
 
 ## Decision tree
 
-- **New project, no stated SSR/SEO need** → React + Vite.
-  This is the default; pick it unless one of the branches below clearly applies.
-  Triggers: "start a new frontend project", "scaffold a web app", "set up a React project", "build a dashboard/tool/internal app" with no mention of SEO or an existing stack.
+- **New project, no stated SSR/SEO need** → React + Vite (template `react-web`; `--data with_api=false` for client-only).
+  Triggers: "start a new frontend project", "scaffold a web app", "build a dashboard/tool/internal app".
+- **SSR/SEO explicitly required from day one** → Next.js (`create-next-app`, then the baseline).
+  A fork made at project start, not a cheap upgrade later. Don't default to Next "just in case".
+  Triggers: "needs to be crawlable/indexed", "server-side rendering", "public marketing site", "per-page meta tags".
+- **UI is mostly a map or a single tool view** → plain TypeScript + CSS on Vite, still on `tokens.css`.
+  React adds little when the map library draws most of the screen. Accessibility for any dialogs, menus and forms is then on you: keep them few.
+  Triggers: "map app", "map with a side panel", "single-screen tool".
+- **Single-file prototype, demo, or throwaway** → plain-HTML fallback, importing `tokens.css`.
+  Triggers: "quick prototype", "single-file demo", "HTML artifact I can open in a browser".
+- **Existing project with its own established frontend stack** → don't impose this skill.
+  Flag the conflict and ask how to proceed.
 
-- **SSR/SEO explicitly required from day one** → Next.js.
-  The one exception, and it's a fork made at project start, not a cheap upgrade later — switching after the fact means rewriting routing (React Router → Next's file-based router), data-fetching (TanStack Query → loaders/Server Components), and discarding the Vite build config outright. Decide this up front; don't default into Next "just in case" a project might someday need SEO.
-  Triggers: "needs to be crawlable/indexed by Google", "server-side rendering", "public marketing site", "needs per-page meta tags for social sharing".
-
-- **Single-file prototype, demo, or throwaway artifact** → plain-HTML fallback.
-  No framework, no build step — but it still shares the compiled token file, so it never looks or feels like a different product from the real app.
-  Triggers: "quick prototype", "single-file demo", "just show me a login form", "HTML artifact I can open in a browser".
-
-- **Adding to an existing project that already has its own established frontend stack** → do not impose this skill.
-  Flag the conflict to the user and ask how to proceed instead of silently introducing a second, competing stack into a codebase that already picked one.
-  Triggers: the project already has its own component library, CSS approach, or token file, or the user references an existing design system by a different name.
-
-Full trigger phrases and rationale per branch: `references/decision-tree.md`.
+Full trigger phrases and rationale: `references/decision-tree.md`.
 
 ## Mandatory checklist for every UI task
 
-- [ ] Never hardcode a color, spacing, radius, shadow, or font-size value — always reference a token.
-  A hardcoded value is exactly how the badge-color and "danger red" drift happened elsewhere in this workspace; a token is the only thing that keeps every project's palette provably identical.
-  One exemption: the literal sizing values shadcn's CLI ships inside vendored `src/components/ui/*.tsx` (`ring-[3px]`, `h-6`, `text-[0.8rem]`) stay as-is — they're upstream defaults, not authored choices, and normalizing them forks the components away from what `npx shadcn add` produces. Everything you write is still held to the rule. See "About the vendored shadcn components" in the template README.
-
-- [ ] New primitives come from the shadcn CLI (`npx shadcn@latest add <name>`) — never hand-roll a component shadcn already provides.
-  Hand-rolling throws away Base UI's tested focus/keyboard/ARIA behavior in exchange for a bespoke reimplementation of the same problem, usually a worse one.
-
-- [ ] Never override Base UI's focus, keyboard, or ARIA behavior.
-  It's already WCAG-2.2-grade out of the box; overriding it (e.g. `outline: none`, a custom low-contrast focus ring) is how accessibility regresses, not how it improves.
-
-- [ ] Verify both dark AND light themes before calling any UI work done.
-  A component checked in only one theme is unverified in the other, not merely "probably fine" — token values that pair well in one theme can fail contrast in the other.
-
-- [ ] Plain-HTML work still imports the shared compiled `tokens.css` — never invents its own colors or spacing.
-  This is what keeps a five-minute mockup and the production app pixel-consistent; skipping it defeats the entire point of having a fallback tier at all.
+- [ ] Never hard-code a color, spacing, radius, shadow, or font-size value; use a token.
+  The one exemption: literal sizing values that shadcn's CLI ships inside vendored `src/components/ui/*.tsx` (`ring-[3px]`, `h-9`) stay as-is; normalizing them forks the components away from what `shadcn add` produces. Everything you write is held to the rule.
+- [ ] New primitives come from the shadcn CLI (`pnpm dlx shadcn@latest add <name>`); never hand-roll a component shadcn provides.
+- [ ] Never override Radix's focus, keyboard, or ARIA behavior (`outline: none`, custom low-contrast focus rings).
+- [ ] Verify both dark AND light themes before calling UI work done.
+- [ ] Plain-HTML and plain-TS work imports the shared `tokens.css`; it never invents its own colors or spacing.
 
 ## Scaffolding
 
-Provisioning a fresh project (or copying the boilerplate template) is a fixed set of commands — see `references/project-scaffold.md` rather than reconstructing it from memory or guessing package names.
+Use the template rather than assembling the stack by hand:
 
-Preferred: copy `/Users/sparky/Code/templates/react-vite-material/` directly, since it ships with tokens, Tailwind wiring, and shadcn/Base UI already configured and verified. Only scaffold fresh with `npm create vite@latest` when the template isn't available or doesn't fit. Either path, don't skip wiring the design tokens before writing any component — everything downstream depends on them existing first.
+```bash
+~/code/templates/bin/new-project react-web <dir>
+```
+
+It ships `src/styles/tokens.css`, the `@theme` mapping in `globals.css`, shadcn
+configured for Radix (`components.json`), a sample `Button`, Inter, and a
+theme toggle. Manual steps, for a project that can't use the template:
+`references/project-scaffold.md`.
 
 ## Reference index
 
-- `references/design-tokens.md` — the full DTCG token set (color roles, spacing, type scale, elevation, radius, motion) and how Style Dictionary compiles it. Open before picking any color, spacing, or font-size value.
-  Contains the exact, canonical values — copy them rather than approximating.
-- `references/components.md` — shadcn/ui CLI usage on Base UI primitives; how to add a new component. Open before adding or modifying any UI component.
-  Also covers the Radix fallback path if Base UI isn't a real CLI option at build time.
-- `references/tailwind-config.md` — Tailwind v4's CSS-first `@theme` wiring to the compiled tokens; light/dark strategy. Open when touching Tailwind config or writing utility classes.
-  Includes the common utility-to-token mapping table (what to use instead of an arbitrary-value bracket).
-- `references/plain-html-fallback.md` — the zero-build single-file HTML pattern. Open for quick prototypes, demos, or artifacts.
-  Includes a minimal working example wired entirely to token custom properties.
-- `references/accessibility.md` — WCAG 2.2 AA checklist: what Base UI gives for free vs. what to verify manually. Open before calling any UI accessible.
-  Covers the newer 2.2 criteria specifically: Focus Not Obscured, Focus Appearance, 24×24px target size.
-- `references/project-scaffold.md` — exact commands to provision a new project or copy the template. Open at project start.
-  Also covers when to add routing and when TanStack Query is warranted.
-- `references/decision-tree.md` — expanded decision tree with concrete trigger phrases per branch. Open when it's unclear which branch applies.
+- `references/design-tokens.md` — every token value (color roles, spacing, type, elevation, radius, motion) and how `tokens.css` is organised. Open before picking any value.
+- `references/components.md` — shadcn/ui on Radix: adding and editing components.
+- `references/tailwind-config.md` — the `@theme` mapping from tokens to Tailwind utilities and shadcn role names; light/dark strategy; utility-to-token table.
+- `references/plain-html-fallback.md` — the zero-build single-file pattern.
+- `references/accessibility.md` — WCAG 2.2 AA: what Radix gives for free vs. what to verify.
+- `references/project-scaffold.md` — template use, manual setup, maps, routing and data-fetching additions, Next.js.
+- `references/decision-tree.md` — the decision tree with trigger phrases.
 
 ## Scope
 
-This skill governs new UI work under `/Users/sparky/Code` only. It does not retroactively apply to existing projects that already picked a different stack before this skill existed — those stay as they are unless someone deliberately decides to migrate them, which is a separate, larger decision than anything this skill should trigger on its own. Within scope, treat this file as the index: it holds only what every branch needs (the decision tree, the checklist, the anti-patterns); anything deeper lives in `references/` and is loaded only when the task actually reaches that branch.
+New UI work only. Existing projects that picked a different stack before this
+skill keep it unless someone deliberately decides to migrate them; that's a
+separate decision this skill should never trigger on its own.
 
 ## Worked examples
 
 **"Add a modal to this page."**
-1. Check `src/components/ui/` for an existing `dialog`; if it's not there yet, run `npx shadcn@latest add dialog` (`references/components.md`) instead of writing a custom overlay.
-2. Style the modal surface with token utilities only — `bg-surface`, `rounded-lg`, `shadow-3`, `p-6` — never a raw hex or px value (`references/tailwind-config.md`).
-3. Leave Base UI's focus trap, `Escape`-to-close, and `aria-modal` wiring untouched; that behavior is the entire reason to use the primitive instead of a hand-rolled `<div>` overlay.
-4. Open the page in both light and dark theme and confirm the surface, border, and focus ring are all visible and correctly contrasted in both (`references/accessibility.md`).
-5. Done when: the dialog is keyboard-navigable end to end, every value traces back to a token, and both themes have been visually checked — not before.
+1. Check `src/components/ui/` for a `dialog`; if missing, run `pnpm dlx shadcn@latest add dialog` (`references/components.md`).
+2. Style with token utilities only: `bg-surface`, `rounded-lg`, `shadow-3`, `p-6`; never a raw hex or px value (`references/tailwind-config.md`).
+3. Leave Radix's focus trap, `Escape`-to-close and `aria-modal` wiring alone.
+4. Check the dialog in light and dark themes (`references/accessibility.md`).
+5. Done when it's keyboard-navigable end to end, every value traces to a token, and both themes are checked.
 
 **"Make the button blue."**
-The checklist stops a hardcoded hex here: open `references/design-tokens.md`, check whether an existing role fits (usually `primary`), and use that role's utility class. If no existing role genuinely fits, extend the token set with a new named role and recompile — don't inline `#0000ff` or reach for Tailwind's default `bg-blue-600` directly in the component.
+Don't inline `#0000ff` or Tailwind's `bg-blue-600`. Check whether an existing
+role fits (usually `primary`) and use its utility. If no role fits, add a new
+named role to `tokens.css` in the templates repo (light and dark values), map
+it in `@theme`, and update projects with `copier update`.
 
 ## Anti-patterns
 
-- Don't hand-roll a component shadcn already provides.
-- Don't hardcode a hex or px value — use a token.
-- Don't override Base UI's focus, keyboard, or ARIA behavior.
-- Don't ship UI checked in only one theme — dark and light both, every time.
-- Don't invent a new color/spacing/type value outside the token set — extend the token set instead.
-- Don't impose this stack on an existing project that already has its own frontend stack — flag the conflict instead.
-- Don't reach for `tailwind.config.js` — Tailwind v4 config lives in the CSS `@theme` block.
-- Don't let a plain-HTML prototype drift from the compiled `tokens.css`.
-- Don't patch a shadcn component via `node_modules` — it's copied into the repo; edit it directly in `src/components/ui/`.
-- Don't default to Next.js "just in case" — it's the documented exception, not the baseline.
+- Hand-rolling a component shadcn already provides.
+- Hard-coding a hex or px value instead of a token.
+- Overriding Radix's focus, keyboard or ARIA behavior.
+- Shipping UI checked in only one theme.
+- Inventing a color/spacing/type value outside the token set, or editing a project's vendored `tokens.css` instead of the templates repo's.
+- Imposing this stack on an existing project with its own; flag the conflict instead.
+- Reaching for `tailwind.config.js`: Tailwind v4 config lives in the CSS `@theme` block.
+- Using MUI or another component library alongside shadcn.
+- Patching a shadcn component via `node_modules`: it's copied into the repo; edit it in `src/components/ui/`.
+- Defaulting to Next.js "just in case".

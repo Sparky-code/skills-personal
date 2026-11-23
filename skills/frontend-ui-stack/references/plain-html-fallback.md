@@ -1,70 +1,74 @@
-# Plain-HTML Fallback
+# Plain-HTML fallback
 
-For a quick single-file prototype, demo, or throwaway artifact where a full Vite/React scaffold is overkill, use plain HTML/CSS/vanilla JS — but it still shares the exact same visual language as every React project, because it imports the same compiled `tokens.css`.
+For a single-file prototype, demo or throwaway artifact where a Vite/React
+scaffold is overkill: plain HTML, CSS and a little vanilla JS, using the same
+`tokens.css` as every app so it looks like the same product.
 
-**Reference fixture**: `/Users/sparky/Code/templates/plain-html-fallback/` (a sibling build task provisions this — if the path doesn't exist yet, treat the pattern below as the spec).
-
-```
-templates/plain-html-fallback/
-├── index.html      # single file, links the same compiled tokens.css
-├── tokens.css      # copy of the generated file — same source of truth
-└── README.md
-```
+Sketches live in the `sketches` repo, a folder each (`project-standards`:
+`static-prototypes-homelab.md`), with a copy of `tokens.css` from the
+templates repo (`shared/tokens.css`) next to the HTML file.
 
 ## The rule
 
-A plain-HTML prototype must **never invent its own colors, spacing, or type values.** It links (or inlines) the identical `tokens.css` that Style Dictionary compiled for the React tier. This is the entire point of the fallback: a five-minute mockup and the production app render pixel-identical spacing, color, and type, because both read from one file.
+A prototype never invents its own colors, spacing or type values. It links (or
+inlines) the shared `tokens.css` and uses its variables.
 
 ## Minimal pattern
 
 ```html
 <!doctype html>
-<html data-theme="light">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <title>Prototype</title>
   <link rel="stylesheet" href="./tokens.css" />
   <style>
     body {
-      background: var(--color-background);
-      color: var(--color-text);
-      font-family: "Inter", system-ui, sans-serif;
+      background: var(--background);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: var(--type-body-large-size);
+      line-height: var(--type-body-large-line);
       margin: 0;
       padding: var(--space-6);
     }
     .card {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--rounded-lg);
       box-shadow: var(--elevation-2);
       padding: var(--space-5);
     }
     .btn-primary {
-      background: var(--color-primary);
-      color: var(--color-on-primary);
+      background: var(--primary);
+      color: var(--on-primary);
       border: none;
-      border-radius: var(--radius-md);
+      border-radius: var(--rounded-md);
       padding: var(--space-2) var(--space-4);
-      font-size: 14px; /* body-medium / label-large scale */
+      font: inherit;
+      font-size: var(--type-label-large-size);
+      font-weight: var(--type-label-large-weight);
+      min-height: 24px;
       cursor: pointer;
       transition: background var(--duration-fast) var(--easing-standard);
     }
-    .btn-primary:hover {
-      background: var(--color-primary-hover);
-    }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
   </style>
 </head>
 <body>
   <div class="card">
-    <button class="btn-primary">Continue</button>
+    <button class="btn-primary" onclick="toggleTheme()">Toggle theme</button>
   </div>
   <script>
-    // Theme toggle: flips the data-theme attribute the same way
-    // the React template's use-theme hook does, so both tiers
-    // stay behaviorally consistent, not just visually consistent.
+    // Same mechanism as the React template: data-theme on <html> overrides
+    // the OS setting.
     function toggleTheme() {
       const root = document.documentElement;
-      root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+      const dark = root.dataset.theme
+        ? root.dataset.theme === "dark"
+        : matchMedia("(prefers-color-scheme: dark)").matches;
+      root.dataset.theme = dark ? "light" : "dark";
     }
   </script>
 </body>
@@ -73,10 +77,14 @@ A plain-HTML prototype must **never invent its own colors, spacing, or type valu
 
 ## What this buys you
 
-- No build step, no `npm install` — open the file directly in a browser.
-- Still zero token drift from the React app, because both consume the exact same generated CSS file, not a hand-copied approximation.
-- A prototype validated here (colors, spacing, contrast) ports directly into the React tier later — swap raw CSS classes for Tailwind utilities that map to the same underlying variables, and swap hand-written markup for shadcn components; no visual rework needed.
+- No build, no install: open the file in a browser.
+- No token drift from the apps: the same file, not an approximation.
+- A validated prototype ports straight into the React tier: swap the CSS for
+  the mapped Tailwind utilities and the markup for shadcn components.
 
-## What this does not replace
+## What it doesn't replace
 
-This fallback is for prototypes and demos, not for a real application: no component behavior (focus trapping, keyboard nav, ARIA) is provided for free the way Base UI provides it in the React tier. If the "quick demo" grows into a real feature, migrate it into the Vite/React scaffold (`project-scaffold.md`) rather than continuing to hand-roll interaction logic in vanilla JS.
+No component behavior (focus trapping, keyboard navigation, ARIA) comes for
+free here. When a sketch needs a build, a second module of logic, or real
+data, promote it to a proper project (React + shadcn, or plain TS for
+map-first UIs) instead of growing hand-rolled interaction code.
