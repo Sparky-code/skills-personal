@@ -10,7 +10,8 @@ collection managed by a lockfile. Nothing here comes from upstream.
 
 | Skill | Purpose |
 |---|---|
-| `frontend-ui-stack` | The default frontend stack for `/Users/sparky/Code` — Vite + React, Tailwind v4, shadcn/ui on Base UI, DTCG tokens via Style Dictionary, Material principles (not MUI). |
+| `project-standards` | The standard project shapes and the baseline every repo gets: toolchains (pnpm/Node 24/TS 7/Biome/Vitest; uv/Python 3.14/ruff/mypy), lefthook hooks and the commit convention, CI, data and migrations, web/mobile/CLI/job/library rules, the Claude CLI wrapper rule, and the Copier templates (`Sparky-code/templates`) that scaffold them. |
+| `frontend-ui-stack` | The default frontend stack — Vite + React (Next.js only for SSR/SEO, plain TS for map-first tools), Tailwind v4, shadcn/ui on Radix, one shared `tokens.css`, MapLibre for maps, Material principles (not MUI). |
 | `local-llm-mlx` | The default local-LLM stack — MLX via mlx-lm, two Qwen3 tiers behind one client, LoRA adapters with the `v{n}` / `current.json` promotion contract. |
 | `interview-mode` | Plan-first, checkpointed, scope-fenced execution for timed or graded sessions (interviews, take-homes, live pairing). |
 | `dream` | Manual `/dream` — local reconstruction of the Managed Agents Dreams API: consolidates one project's auto-memory against its recent transcripts into a staged copy, with diff, report and a separate promote step. Run state in `~/.claude/dream/`. |
@@ -49,7 +50,7 @@ context. `SKILL.md` loads when the skill fires; `references/*.md` load only if
 actually needed. `local-llm-mlx` is ~1,250 lines — as a command, all of it would
 load on every invocation.
 
-**Auto-trigger.** Both descriptions are written as "Use whenever…" so the model
+**Auto-trigger.** Descriptions are written as "Use whenever…" so the model
 invokes them when relevant work starts, not only when you remember to type a
 slash. Commands can't do that.
 
