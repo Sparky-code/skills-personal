@@ -126,10 +126,10 @@ Material-inspired but flatter and subtler — minimalist, not skeuomorphic. No c
 
 | Token | Value |
 |---|---|
-| `radius-sm` | 6px |
-| `radius-md` | 10px |
-| `radius-lg` | 16px |
-| `radius-full` | 9999px |
+| `rounded-sm` | 6px |
+| `rounded-md` | 10px |
+| `rounded-lg` | 16px |
+| `rounded-full` | 9999px |
 
 ## Motion tokens
 
